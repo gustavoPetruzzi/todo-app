@@ -1,5 +1,5 @@
 services:
-  app:
+  todo-app:
     build: .
     depends_on:
       - postgres

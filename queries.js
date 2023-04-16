@@ -16,6 +16,9 @@
 
 const Pool = require('pg').Pool;
 
+console.log("user", process.env.POSTGRES_USER);
+console.log("db", process.env.POSTGRES_DB);
+
 const pool = new Pool({
 	user: process.env.POSTGRES_USER,
 	host: 'postgres',
@@ -47,7 +50,7 @@ const login = (email, password) => {
  * @returns {Promise<Todo[]>} - a list with all todos 
  */
 const getTodosByUser = (userId) => {
-  return pool.query('SELECT id, description, active WHERE userId = $1', [userId])
+  return pool.query('SELECT id, description, active', [userId])
     .then(results => results.rows)
 }
 
@@ -57,7 +60,37 @@ const getTodosByUser = (userId) => {
  * @param {number} userId - id of the todo's owner
  */
 const addTodo = (description, userId) => {
-  return pool.query('INSERT INTO todos (description, active, userId) VALUES ($1, true, $2)', [description, userId])
+  return pool.query('INSERT INTO todos (description, active, fk_user) VALUES ($1, true, $2)', [description, userId])
     .then(results => results.rows[0].id)
 }
+
+/**
+ * 
+ * @param {number} todoId - todo's id 
+ * @param {string} description  - description that's going to be updated
+ * @returns {Promise<Todo[]>} - A promise of the todos affected
+ */
+const updateTodo = (todoId, description) => {
+  return pool.query('UPDATE todos SET description = $1 WHERE id = $2', [description, todoIn])
+    .then(results => results.rows);
+}
+
+/**
+ * 
+ * @param {number} todoId - todo's id
+ * @param {boolean} isActive  - new status for todo
+ * @returns {Promise<Todo[]>} = A promise of the todos affected
+ */
+const toogleTodo = (todoId, isActive) => {
+  return pool.query('UPDATE todos SET active = $1 WHERE id = $2', [isActive, todoId])
+    .then(results => results.rows);
+}
+
+module.exports = {
+  getTodosByUser,
+  addTodo,
+  updateTodo,
+  toogleTodo
+}
+
 
